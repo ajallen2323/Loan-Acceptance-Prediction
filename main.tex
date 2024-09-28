@@ -1,0 +1,192 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[section]{placeins}
+
+\title{DS 301 Project Midterm}
+\author{aaschoen Schoen}
+\date{October 2023}
+
+\begin{document}
+
+\begin{center}
+{\Large \textbf{Machine Learning Methods for Loan Acceptance Prediction}
+
+\vspace{10pt}
+
+Project Midterm Report}
+
+\vspace{10pt}
+
+\textit{Team Members: Allison Schoen, Angelina Allen}
+\end{center}
+
+% \linethickness{1mm}\line(1,0){498}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+The loan approval process has proven time and time again to be inefficient and potentially unfair to applicants. Banks and creditors have needed help finding the perfect combination of categorical and quantitative factors to properly assess the eligibility of candidates. Companies have turned to machine-learning methods to automate this process to address this issue. In this project, we were tasked to find the machine-learning process with the highest accuracy in predicting loan acceptance. We were given customer data with various measurements and characteristic qualifications along with the outcome of the application to build our models. Several different options, including Decision Tree, Naive Bayes, K-Nearest Neighbors, Random Forest, Support Vector Machines, and Logistic Regression, were tested in this process. These machine-learning methods are contrasted based on the accuracy score given using standard scikit-learn metrics. These algorithms were then recalculated using the individual hyperparameter tuning options available for each method. Among these machine-learning models initially explored, K-Nearest Neighbors with k=5 achieved the highest accuracy in predicting acceptance at 88.2 percent.
+\end{abstract}
+
+\section{Introduction}
+
+Our task was to train multiple machine-learning models to help a company streamline its loan application process. The company wants to move customers to an online form and determine whether the applicant is eligible for a loan in real-time. The current loan approval process is extremely time-consuming and requires a lot of manpower. With this current structure, errors are often made, and personal bias from the workers may skew an applicant's chances, whether intentional or not. We were given a data set of previous loan applications, some characteristics of the person applying, and their approval status to accomplish this task. 
+
+We will implement several machine learning models to automate the loan approval process. We will use Logistic Regression, K-Nearest Neighbors, Support Vector Machines, Naive Bayes, Random Forest, and the Decision Tree Classifier for our initial testing. These algorithms can be run using Python and have several modifications and hyperparameter tuning options we can test within each method to further improve our models. 
+
+Our expected outcomes are accuracy scores for each machine-learning method. We will run a sample of selected dependent variables through our trained models and compare those results will the actual outcomes from the data set. These scores indicate the percentage of correctly classified loans as approved or not. For the K-Nearest Neighbor classifier, we will also obtain a graph of accuracy scores at various values and ranges of k. This graph will help determine the k that should be used to obtain the highest possible model accuracy. We can also visualize our other models in some capacity, like plotting the support vectors in SVM, but we will not need the visual component for our goal in this analysis. 
+
+There are several subsections in this report. We discuss other studies that have conducted similar processes on different data sets and compare our findings to theirs. We also detail the data science behind each algorithm and how they fit their respective model to the data. After comparing our initial accuracy scores, we propose further machine-learning methods to test our data set and potential improvements to be made to current methods. We test some of these improvements through hyperparameter tuning that is individual to each machine-learning method. These improvements will lead us to our final version of this project and our overall conclusion of the best method to select. 
+
+\section{Related Work}
+
+The main reason for so much research and experiments on machine learning models for loan acceptance is to eliminate implicit bias from the process. This process becomes subjective when banks use loan officers to approve or deny loan applications. The racial, gender, or ethnic profile of the employee and the applicant can come into play and affect the quantitative qualifications of an application. Evidence of such discriminatory practices has been researched and published by groups like the Federal Reserve Bank of Philadelphia [4]. An example of their findings was that Black mortgage applicants have 3.5 to 5 percent lower approval rates than White mortgage applicants. Thus, data and computer scientists have continuously experimented with various machine learning methods to make the process more efficient and objective. Some examples of such research are included in the following paragraphs.
+
+Researchers at the Nitte Meenakshi Institute of Technology[1] recently conducted a machine-learning project similar to ours. The time-consuming nature of the loan approval process led this research team to assess and propose machine-learning approaches to determine the probability of acceptance. They had the same goal: finding the method with the highest accuracy score based on standard assessment metrics. This team chose to test KNN, Random Forest, Naive Bayes, and Decision Tree algorithms. They found the highest accuracy score occurred with Naive Bayes, at 83.73 percent correct. 
+
+The University of South Dakota[2] also conducted a similar analysis as we did and the Nitte Meenakshi Institute of Technology. They had the same goal of determining the probability of loan acceptance by finding the most accurate machine-learning method. The data collected in this study overlapped with our data but had more quantitative measurements as opposed to us having mostly categorical variables. To determine the highest accuracy, the researchers tested  Lightgbm, Logistic Regression, Adaboost, Random Forest, K-Nearest Neighbor, XGBoost, and Decision Tree algorithms. We have not discussed some of these methods in class, so we will not be fully able to compare our results to theirs. University of South Dakota's analysis concluded that Logistic Regression was the most accurate at 92 percent correct. 
+
+A collaborative experimental paper published by computer scientists from the University of Petroleum and Energy Studies, Chandigarh University, and Singidunum University in India[3] also explored potential machine learning algorithms for loan acceptance. Their goal was to develop a system to save banks assets and time regarding granting loans. The researchers also used sklearn and assessed the standard accuracy scores of models built using Random Forest, Logistic Regression, and Decision Tree algorithms. After training all three models, they concluded that Logistic Regression was the most accurate in predicting loan acceptance at 82.9 percent correct. 
+
+\section{Preparing the Data}
+\subsection{Data Collection}
+We found our data set on Kaggle and could download it as a CSV file. The data set itself includes 13 variables. Eight are categorical, four are continuous, and one is an identifier for the loan I.D. The eight categorical variables are gender (male or female), married (married or not married), education (graduate or undergraduate), self-employed (yes or no), credit history (bad or good), property area (rural or urban), and resulting approval status (accepted or not). The continuous variables are the applicant's income (monthly), the co-applicant's monthly income, the number of dependents, the loan amount, and its term (repayment period in days). The variable loan I.D. is the unique loan reference number for each applicant. There are 614 total observations in the data set before any cleaning procedures. 
+\subsection{Feature Selection}
+The target variable for our classification models is loan status, which indicates Y if the loan was accepted and N if not. The features we will use to fit these models are Property Area, Applicant Income, Loan Amount, Credit History, Employment, Gender, and Marital Status. We narrowed the data set to fewer categorical variables to differ from previous research on this topic. We did not want to test the same variables on different data and felt the variables we selected would be the most indicative of loan approval. Therefore, we removed Education, Coapplicant Income, Loan Amount Term, and Dependents.
+\subsection{Data Preprocessing}
+We first had to drop unnecessary or non-selected variables we previously mentioned. For our categorical data, we needed to convert the character values of each column into dummy variables so it could be processed by machine learning. We used the get dummies function in pandas on these columns to accomplish this task. We then dropped one of the corresponding columns for each variable as this function creates a "yes" and "no" column for all categorical variables. Next, we needed to clean the data set for missing values that may skew our model classifications. Their removal was done using the dropna() function. Finally, we want to remove any potential outliers to the data set. We found the first and third quartiles and calculated if any values were above or below 1.5 times these values. After all of these filters, the data was reduced to 377 observations from the original 614.   
+\subsection{Splitting the Dataset}
+To prepare to fit our models, we defined X as our feature variables (the selected applicant attributes) and Y as our target variable (loan approval status). We then divided the data, using an 80 percent training and 20 percent testing split. Thus, we have Xtest, Ytest, Xtrain, and Ytrain that will be reused throughout each machine-learning method. We have now fully prepared and cleaned our data for analysis.
+
+\section{Machine Learning Methods}
+\subsection{Logistic Regression}
+Logistic Regression estimates the probability that a data point belongs to a given category using the sigmoid function. This function takes the form S(x) = \(1/1+e^x\) and has a notable S-shaped curve. The values of this function are probabilities and thus only fall between zero and one. To fit a logistic regression in Python, we import LogisticRegression from linear sklearn and create the model using our split X and Y training sets. This method can make a scatterplot of the resulting model and the associated decision boundary. Finally, we can adjust the decision threshold to various values beyond the default of 0.5 and reassess accuracy using sklearn metrics.  
+\subsection{K-Nearest Neighbor}
+KNN uses a desired value of k neighbors of a data point to classify said point. After finding the chosen number of neighbors, the algorithm determines the majority classification of these neighbors and assigns it to the point. The default k value in Python is 100, but it can be changed to better suit the data. The value of k can cause overfitting or underfitting, but we can compute and plot a range of k values to find the best possible option. To fit a KNN in Python, we import KNeighborsClassifier from sklearn and fit using Xtrain and Ytrain. We initially set the range of k neighbors from 1 to 25 and obtained and compared accuracy scores using sklearn metrics for these values. The highest accuracy occurred when k=5 for this range of k values.  
+\subsection{Support Vector Machines}
+SVM maps data using classification algorithms to define a separator and distinguish between two possible groups. This process aims to find the linear separator that creates the largest margin for the data points on each side. Data points that fall close to the separator thus have less confidence in their classifications, while those further away in distance have more confidence. We import SVC from sklearn.svm to fit SVM in Python and set the kernel to linear. After creating our model, we can make a scatterplot with the decision boundary and support vectors to visualize this process. Finally, we can remove the initial support vectors and retrain and reassess model accuracy with new ones. The training accuracy score was found using model.score since we do not use our train/test split for SVM.  
+\subsection{Decision Tree Classifier}
+The Decision Tree Classifier creates branches for each categorical variable to separate the data by its features. This process groups data points with the same attributes as additional branches of the tree are added. By the end, each grouping of applicant attributes is assigned its corresponding classification of approved or not, and we can feed data into the tree built. To construct a Decision Tree model in Python, we import tree from sklearn and fit DecisionTreeClassifier with Xtrain and ytrain. We then predict Y from Xtest and compute the accuracy score using sklearn metrics.
+\subsection{Random Forest Classifier}
+Building on the Decision Tree classifier, the Random Forest Classifier uses more than one tree in its algorithm. Ensemble learning methods, like bagging, aim to improve weak classifiers like decision trees. Bagging, or bootstrap aggregation, selects samples of the training set with replacement and reduces the overall variance of the model. The Random Forest Classifier trains a decision tree on these independently chosen samples. To implement this machine-learning method in Python, we import RandomForestClassifier from sklearn.ensemble and fit the model using Xtrain and Ytrain. We assess the accuracy of the predictions made with this method using standard sklearn metrics. 
+\subsection{Naive Bayes}
+The Naive Bayes classifier uses Bayes' rule to classify data points. Bayes' conditional probability theorem calculates an event's probability, given that other related events are true. The formula for this theorem is \(P(A|B) = (P(B|A)*P(A))/P(B)\). This supervised machine learning method assumes all data features are independent and combines multiple algorithms to predict classifications. We import GaussianNB from sklearn.naivebayes to implement this method in Python and fit the model using Xtrain and ytrain. We assess the accuracy of the classifications using the standard accuracy score given in sklearn. 
+
+ \section{Experimental Results}
+\begin{table} [h]
+    \centering
+    \begin{tabular}{ccccc}
+          Dummy& Linear Perceptron& Logistic Regression\\
+          50.0& 80.6& 80.6\\
+    \end{tabular}
+    \caption{Baseline Classifications}
+    \label{tab:my_label}
+\end{table}
+
+To set a baseline for comparison of our machine-learning methods, we fit Linear Perceptron, Dummy Classifier, and Logistic Regression models using the split data. Linear Perceptron is a supervised machine learning algorithm that uses linear classification. The Dummy Classifier model ignores input features and is independent of the training data. We expect all other models to be more accurate than the Dummy Classifier model. Logistic Regression was described in section 4.1 of this report. The Dummy Classifier produced an accuracy score of 50 percent, while the Linear Perceptron and Logistic Regression models were about 80.6 percent. These results are illustrated in Table 1 above. We used the same features as the methods conducted throughout this report to set these baseline values.
+
+\begin{table} [h]
+    \centering
+    \begin{tabular}{ccccc}
+          SVM&  Decision Tree&  Random Forest& KNN& Naive Bayes\\
+          80.9&  69.7&  80.3& 88.2& 75.2\\
+    \end{tabular}
+    \caption{Accuracy Scores (Percentages)}
+    \label{tab:my_label}
+\end{table}
+
+ Table 2 above illustrates the resulting accuracy scores of our chosen methods. All models improved on the Dummy Classifier model as expected. The only models to at least slightly improve on the Linear Perceptron/Logistic Regression models were SVM and KNN. SVM saw a 0.3 percent increase in accuracy with initial support vectors and default settings. KNN saw a 7.6 percent increase in accuracy, with k=5 producing the best results after testing 1-25. The Decision Tree classifier produced the worst outcome, with a 10.9 percent decrease in the accuracy score. The Naive Bayes model was the second worst result, with a 5.4 percent decrease in accuracy from the baseline model. Finally, the Random Forest model produced similar results to the baseline algorithms, but was 0.3 percent less accurate. 
+
+ \subsection{Hyperparameter Tuning}
+\begin{table}
+    \centering
+    \begin{tabular}{ccccc}
+          0.5& 0.6& 0.7& 0.8& 0.9\\
+          80.6&  80.4& 76.1& 62.1& 19.4\\
+    \end{tabular}
+    \caption{Logistic Regression Decision Thresholds}
+    \label{tab:my_label}
+\end{table}
+\FloatBarrier
+After our initial run of selected machine learning methods, we decided to test some hyperparameter tuning metrics. This process aimed to see if modifications from the default settings given in sklearn would benefit the accuracy score for our data. The first of these updates was increasing the decision threshold for Logistic Regression. The default is 0.5, so we tested 0.6, 0.7, 0.8, and 0.9. There was no improvement in the accuracy score. Each increase in the decision threshold leads to greater and greater decreases in the percentage of correct classifications. These results are illustrated in Table 3 of the accuracy score results displayed above.
+
+ \begin{table} [h]
+    \centering
+    \begin{tabular}{ccccc}
+          Original& New\\
+          80.9& 80.9\\
+    \end{tabular}
+    \caption{Retrained Support Vectors}
+    \label{tab:my_label}
+\end{table}
+\FloatBarrier
+Secondly, we removed the initial support vectors from Support Vector Machines and retrained the model. This was done by deleting the supports using np.delete on X and y. We retrained the model using the same initial process to obtain new support vectors and reassessed the accuracy score. These new support vectors did not affect the accuracy score, as shown in Table 4 above. Thus, we did not see an improvement in correct loan approval classification with hyperparameter tuning on SVM.  
+
+ \begin{table} [h]
+    \centering
+    \begin{tabular}{ccccc}
+          Default& 3\\
+          69.7& 85.5\\
+    \end{tabular}
+    \caption{Maximum Depth for Decision Tree}
+    \label{tab:my_label}
+\end{table}
+
+Next, we changed the maximum depth to 3 and retrained the Decision Tree algorithm. The maximum depth affects the model's ability to capture patterns in the data. When it is too high, we may have overfitting; when it is too low, we may have underfitting. Underfitting leads to a lower accuracy score, and overfitting leads to a higher accuracy score. Therefore, the performance changes when we change our maximum depth in a direction dependent on the data. In our case, we saw a 15.8 percent increase in the accuracy score for the new Decision Tree model. These results are depicted in Table 5 above. Compared to the baseline algorithms, the maximum depth 3 led to a 4.9 percent increase from Logistic Regression/Linear Perceptron and a 35.5 percent increase from the Dummy Classifier. 
+
+ \begin{table} [h]
+    \centering
+    \begin{tabular}{ccccc}
+          Default& 10& 150& 200& 250\\
+          80.3& 75.0& 78.9& 80.3& 78.9\\
+    \end{tabular}
+    \caption{Number of Estimators for Random Forest}
+    \label{tab:my_label}
+\end{table}
+\FloatBarrier
+
+For our Random Forest model, we changed the number of estimators to 10. The default number of estimators in sklearn is 100, so we speed up the computation time by decreasing the number to 10. Increasing the number of trees typically increases the model's accuracy, so we did not expect this change to help the accuracy score. Therefore, we opted to increase the estimators to 150 and 200. This process produced slight increases from 10 to 200 estimators, but the default 100 and 200 saw the same results. Further increasing to 250 once again decreased accuracy. These results are displayed in Table 6 above. Thus, deviations from the default number of estimators did not increase the accuracy score for our Random Forest model. The Random Forest model, therefore, did not increase the accuracy score compared to our baseline models, Logistic Regression, Linear Perceptron, and Dummy Classifier. 
+
+ \begin{table} [h]
+    \centering
+    \begin{tabular}{ccccc}
+          5& 29\\
+          88.2& 88.1\\
+    \end{tabular}
+    \caption{Further Values of K for KNN}
+    \label{tab:my_label}
+\end{table}
+\FloatBarrier
+Finally, we tested increasing values of k for K-Nearest Neighbors greater than our original range of 1 to 25. We tested 25-100 and found that k=29 had the highest accuracy but was slightly lower than the value of k=5 found previously. We did not have any higher values of k, but we could have since we have 377 unique observations in the data set. Thus, the KNN model had the highest accuracy score at 88.2 percent and had the greatest overall improvement from our baseline models. The second highest score was the Decision Tree with maximum depth 3, which is 2.7 percent lower than KNN. The default Decision Tree Classifier was the worst-scoring machine learning algorithm (besides the Dummy Classifier). 
+
+Therefore, none of the hyperparameter tuning options tested were beneficial to the overall accuracy of each model's machine-learning classification except the Decision Tree's maximum depth. The default settings of KNN had the greatest increase in accuracy from the baseline classification and did not benefit from hyperparameter tuning. 
+
+\section{Conclusions and Future Exploration}
+Our project aimed to address the inefficiency and potential bias in the traditional loan approval processes by utilizing multiple machine learning methods. Specifically, we explored Logistic Regression, K-Nearest Neighbor, Support Vector Machines, Decision Tree Classifiers, Random Forest Classifiers, and Naive Bayes Classifiers to predict loan acceptance based on customer data. The most accurate method is the K-Nearest Neighbor, with an accuracy score of 88.2 at K=5 after testing 1-25.  Then, we explored hyper-parameter tuning to explore potential enhancements to the models. The results indicate that for most models, the default setting or initial hyper-parameters were most optimal. Specifically, when implemented on our most accurate method of K-Nearest, we tested 25-100 and found that k=29 had the highest accuracy but was slightly lower than the value of k=5 found previously.
+
+Our discoveries exhibited slight variations when compared to the related studies we found. The Nitte Meenakshi Institute of Technology research found their most accurate machine learning method to be Naive Bayes, at 83.73 percent correct. Furthermore, the University of South Dakota explored certain methods not covered in our coursework. However, in connection with our work, their findings revealed that Logistic Regression yielded the highest accuracy of 92 percent correctness. Lastly, the collaborative experimental paper published by computer scientists from the University of Petroleum and Energy Studies, Chandigarh University, and Singidunum University in India found that Logistic Regression was the most accurate in predicting loan acceptance at 82.9 percent correctness. 
+
+Through our research, we contribute to eliminating implicit bias in the loan approval processes. This report demonstrates the potential of machine learning in transforming this realm of work. For future exploration, this may involve more machine learning methods implemented, examining broader data sets to strengthen the resilience of our conclusions, and fine-tuning feature selection strategies. These findings and research serve as a foundation for future advancement in automating and enhancing financial decision-making processes.
+
+
+    
+
+\section{References}
+
+[1] V, Viswanatha and A.C., Ramachandra and K N, Vishwas and G, Adithya, Prediction of Loan Approval in Banks Using Machine Learning Approach (August 4, 2023). International Journal of Engineering and Management Research, Volume-13, Issue-4 (August 2023), Available at SSRN: https://ssrn.com/abstract=4532468
+
+\noindent[2] Farjana, A. Muntasir, M. (2023). Predicting Bank Loan Eligibility Using Machine Learning Models and Comparison Analysis. The University of South Dakota: https://ieomsociety.org/proceedings/2022orlando/328.pdf
+
+\noindent [3] Hitesh Kumar Sharma, Tanupriya Choudhury, Prashant Ahlawat, Sachi Nandan Mohanty, Sarika Jain (2022). Machine Learning model for Loan Amount Prediction and
+Distribution. Advances in Computational Intelligence, its Concepts, and Applications, Volume-3283: https://ceur-ws.org/Vol-3283/Paper100.pdf
+
+\noindent [4] Marco Giacoletti, Rawley Z. Heimer, Edison G. Yu (2021). Using High-Frequency Evaluations to Estimate Discrimination: Evidence from Mortgage Loan Officers. Federal Reserve Bank of Philadelphia: https://www.philadelphiafed.org/-/media/frbp/assets/working-papers/2021/wp21-04.pdf
+\end{document}
+
+\maketitle
+
+\section{Introduction}
+
+\end{document}
